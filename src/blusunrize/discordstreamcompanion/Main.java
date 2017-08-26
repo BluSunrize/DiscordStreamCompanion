@@ -1,3 +1,5 @@
+package blusunrize.discordstreamcompanion;
+
 /**
  * @author BluSunrize
  * @since 25.08.2017

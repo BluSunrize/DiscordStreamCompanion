@@ -1,6 +1,6 @@
-package config;
+package blusunrize.discordstreamcompanion.config;
 
-import util.Utils;
+import blusunrize.discordstreamcompanion.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +24,6 @@ public class GuiConfig
 	private JTextField field_color;
 	private JComboBox select_alignment;
 	private JCheckBox checkbox_avatars;
-	private JCheckBox checkbox_name;
 	private JTextField field_bgcolor;
 	private JComboBox select_channelName;
 

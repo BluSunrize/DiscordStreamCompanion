@@ -1,6 +1,9 @@
-import config.AlignmentStyle;
-import config.ChannelNameStyle;
-import config.Config;
+package blusunrize.discordstreamcompanion;
+
+import blusunrize.discordstreamcompanion.config.AlignmentStyle;
+import blusunrize.discordstreamcompanion.config.ChannelNameStyle;
+import blusunrize.discordstreamcompanion.config.Config;
+import blusunrize.discordstreamcompanion.util.Utils;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -13,22 +16,25 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import util.Utils;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.*;
-import java.awt.image.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
-import java.util.logging.Level;
+import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * @author BluSunrize
@@ -36,7 +42,7 @@ import java.util.logging.Logger;
  */
 public class DiscordStreamCompanion extends ListenerAdapter
 {
-	private final Logger logger = Logger.getLogger("DSC");
+	public final Logger logger = Logger.getLogger("DSC");
 	private final File dataFolder;
 	private final Config config;
 	private JDA jdaInstance;
@@ -47,7 +53,8 @@ public class DiscordStreamCompanion extends ListenerAdapter
 	{
 		this.dataFolder = new File(System.getenv("APPDATA")+"/DiscordStreamCompanion");
 		this.dataFolder.mkdirs();
-		this.config = new Config(dataFolder);
+		this.setupLogger();
+		this.config = new Config(this, dataFolder);
 
 		while(!this.config.isLoaded())
 			Utils.threadSleep(100);
@@ -62,7 +69,28 @@ public class DiscordStreamCompanion extends ListenerAdapter
 					.buildAsync();
 		} catch(LoginException|IllegalArgumentException|RateLimitedException e)
 		{
-			logger.log(Level.SEVERE, e.getLocalizedMessage());
+			logger.severe(e.getLocalizedMessage());
+		}
+	}
+
+	private static final String[] LOGFILES = {"3", "2", "1", "latest"};
+
+	private void setupLogger()
+	{
+		for(int i = 1; i < LOGFILES.length; i++)
+		{
+			File f = new File(this.dataFolder, "log_"+LOGFILES[i]+".log");
+			f.renameTo(new File(this.dataFolder, "log_"+LOGFILES[i-1]+".log"));
+		}
+		try
+		{
+			FileHandler fh = new FileHandler(this.dataFolder+"/log_"+LOGFILES[3]+".log");
+			logger.addHandler(fh);
+			SimpleFormatter formatter = new SimpleFormatter();
+			fh.setFormatter(formatter);
+		} catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -82,7 +110,7 @@ public class DiscordStreamCompanion extends ListenerAdapter
 						break search;
 					}
 
-		logger.log(Level.INFO, "Connection has been established, Selfbot active for "+userId);
+		logger.info("Connection has been established, Selfbot active for "+userId);
 	}
 
 	private static final String PREFIX = "!dsc.";
@@ -94,21 +122,11 @@ public class DiscordStreamCompanion extends ListenerAdapter
 		{
 			Message message = event.getMessage();
 			String content = message.getContent();
-			if(content.startsWith(PREFIX+"parsehex:"))
-			{
-				String in = content.substring((PREFIX+"parsehex:").length());
-				try
-				{
-					System.out.println("c: "+Utils.parseColor(in, null));
-				} catch(Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
 
 			switch(content.substring(PREFIX.length()))
 			{
 				case "ping":
+					logger.info("Requesting ping");
 					new Thread(() -> {
 						message.editMessage("Pong! :three:").complete();
 						Utils.threadSleep(1000);
@@ -120,6 +138,7 @@ public class DiscordStreamCompanion extends ListenerAdapter
 					break;
 				case "config":
 				case "cfg":
+					logger.info("Opening config");
 					this.config.openConfigGui().addWindowListener(new WindowAdapter()
 					{
 						@Override
@@ -130,6 +149,7 @@ public class DiscordStreamCompanion extends ListenerAdapter
 					});
 					break;
 				case "shutdown":
+					logger.info("Shutting down");
 					message.delete().complete();
 					this.jdaInstance.shutdown();
 					System.exit(0);

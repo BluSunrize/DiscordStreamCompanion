@@ -1,4 +1,4 @@
-package util;
+package blusunrize.discordstreamcompanion.util;
 
 import java.awt.*;
 import java.awt.geom.Point2D;

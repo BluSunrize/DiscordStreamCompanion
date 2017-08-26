@@ -1,4 +1,4 @@
-package util;
+package blusunrize.discordstreamcompanion.util;
 
 import javax.swing.*;
 import java.awt.*;

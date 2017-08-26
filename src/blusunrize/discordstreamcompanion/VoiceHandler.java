@@ -1,6 +1,8 @@
+package blusunrize.discordstreamcompanion;
+
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.VoiceChannel;
-import util.Utils;
+import blusunrize.discordstreamcompanion.util.Utils;
 
 /**
  * @author BluSunrize

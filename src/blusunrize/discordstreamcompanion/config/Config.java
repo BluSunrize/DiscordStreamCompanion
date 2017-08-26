@@ -1,6 +1,7 @@
-package config;
+package blusunrize.discordstreamcompanion.config;
 
-import util.Utils;
+import blusunrize.discordstreamcompanion.DiscordStreamCompanion;
+import blusunrize.discordstreamcompanion.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,13 +29,19 @@ public class Config
 
 	private boolean isLoaded = false;
 
-	public Config(File dataFolder) throws Exception
+	public Config(DiscordStreamCompanion dsc, File dataFolder) throws Exception
 	{
 		configFile = new File(dataFolder, "config.cfg");
 		if(configFile.exists())
+		{
+			dsc.logger.info("Loading Config");
 			load();
+		}
 		else
+		{
+			dsc.logger.info("No Config Present, creating new one");
 			createConfig();
+		}
 	}
 
 	public boolean isLoaded()
