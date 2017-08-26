@@ -19,6 +19,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -33,6 +34,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -55,6 +57,7 @@ public class DiscordStreamCompanion extends ListenerAdapter
 		this.dataFolder.mkdirs();
 		this.setupLogger();
 		this.config = new Config(this, dataFolder);
+		this.setupTray();
 
 		while(!this.config.isLoaded())
 			Utils.threadSleep(100);
@@ -94,6 +97,55 @@ public class DiscordStreamCompanion extends ListenerAdapter
 		}
 	}
 
+	private void setupTray()
+	{
+		if(SystemTray.isSupported())
+			logger.info("Setting up SystemTray");
+		else
+		{
+			logger.info("SystemTray is not supported, tray icon cannot be set up");
+			return;
+		}
+
+		try
+		{
+			URL imageURL = DiscordStreamCompanion.class.getResource("images/icon.png");
+
+			if(imageURL==null)
+			{
+				logger.severe("SystemTray Icon not found");
+				return;
+			}
+
+			final TrayIcon trayIcon = new TrayIcon(new ImageIcon(imageURL, "tray icon").getImage());
+			trayIcon.setImageAutoSize(true);
+			trayIcon.setToolTip("Discord Stream Companion");
+			final SystemTray tray = SystemTray.getSystemTray();
+			final PopupMenu popup = new PopupMenu();
+
+			Menu about = new Menu("About");
+			about.add("Author: BluSunrize");
+			about.add("Libraries: JDA + Dependencies");
+			popup.add(about);
+
+			popup.addSeparator();
+
+			MenuItem item = new MenuItem("Config");
+			item.addActionListener(e -> cmdConfig());
+			popup.add(item);
+
+			item = new MenuItem("Exit");
+			item.addActionListener(e -> cmdShutdown());
+			popup.add(item);
+			trayIcon.setPopupMenu(popup);
+
+			tray.add(trayIcon);
+		} catch(Exception e)
+		{
+			logger.log(Level.SEVERE, "Error setting up SystemTray", e);
+		}
+	}
+
 	@Override
 	public void onReady(ReadyEvent event)
 	{
@@ -113,6 +165,9 @@ public class DiscordStreamCompanion extends ListenerAdapter
 		logger.info("Connection has been established, Selfbot active for "+userId);
 	}
 
+	//==============================================
+	//COMMANDS
+	//==============================================
 	private static final String PREFIX = "!dsc.";
 
 	@Override
@@ -125,6 +180,10 @@ public class DiscordStreamCompanion extends ListenerAdapter
 
 			switch(content.substring(PREFIX.length()))
 			{
+				case "shutdown":
+					message.delete().complete();
+					cmdShutdown();
+					break;
 				case "ping":
 					logger.info("Requesting ping");
 					new Thread(() -> {
@@ -138,26 +197,32 @@ public class DiscordStreamCompanion extends ListenerAdapter
 					break;
 				case "config":
 				case "cfg":
-					logger.info("Opening config");
-					this.config.openConfigGui().addWindowListener(new WindowAdapter()
-					{
-						@Override
-						public void windowClosed(WindowEvent e)
-						{
-							resetVoiceHandlers();
-						}
-					});
-					break;
-				case "shutdown":
-					logger.info("Shutting down");
-					message.delete().complete();
-					this.jdaInstance.shutdown();
-					System.exit(0);
+					cmdConfig();
 					break;
 			}
 
 			message.delete().complete();
 		}
+	}
+
+	private void cmdShutdown()
+	{
+		logger.info("Shutting down");
+		this.jdaInstance.shutdown();
+		System.exit(0);
+	}
+
+	private void cmdConfig()
+	{
+		logger.info("Opening config");
+		this.config.openConfigGui().addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosed(WindowEvent e)
+			{
+				resetVoiceHandlers();
+			}
+		});
 	}
 
 	HashMap<String, VoiceHandler> voiceHandlers = new HashMap<>();
@@ -289,9 +354,9 @@ public class DiscordStreamCompanion extends ListenerAdapter
 
 			ImageIO.write(bi, "PNG", new File(dataFolder, "audiochannel.png"));
 
-		} catch(IOException ie)
+		} catch(IOException e)
 		{
-			ie.printStackTrace();
+			logger.log(Level.SEVERE, "Error writing voicechannel", e);
 		}
 	}
 

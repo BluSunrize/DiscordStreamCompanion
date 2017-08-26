@@ -36,8 +36,7 @@ public class Config
 		{
 			dsc.logger.info("Loading Config");
 			load();
-		}
-		else
+		} else
 		{
 			dsc.logger.info("No Config Present, creating new one");
 			createConfig();
@@ -196,7 +195,6 @@ public class Config
 			writer.close();
 		} catch(Exception e)
 		{
-			e.printStackTrace();
 		}
 	}
 }

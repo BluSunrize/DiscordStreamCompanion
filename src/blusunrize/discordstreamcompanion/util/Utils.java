@@ -61,7 +61,6 @@ public class Utils
 			Thread.sleep(ms);
 		} catch(InterruptedException e)
 		{
-			e.printStackTrace();
 		}
 	}
 }
