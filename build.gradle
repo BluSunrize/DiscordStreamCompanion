@@ -12,7 +12,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 
 def mainVersion = '1.0'
-def buildNumber = '9'
+def buildNumber = '10'
 
 version = "${mainVersion}.${buildNumber}"
 group= 'blusunrize'
