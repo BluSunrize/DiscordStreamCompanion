@@ -1,6 +1,6 @@
 # DiscordStreamCompanion
 This software is a rather basic Selfbot for Discord. This means that it's a bot running through your existing Discord client account.
-[How to set it up](#setup)
+[How to set it up](#configuration)
 
 ## On the topic of Selfbots
 There are some things to keep in mind when using this software:
