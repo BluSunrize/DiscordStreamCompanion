@@ -31,8 +31,7 @@ This is mostly a hobby project / for shits and giggles, but I have some ideas wh
 
 ## Configuration
 When starting the bot for the first time, it will open a config window which requires you to enter your Token. You may also set other options there.
-This information is saved in a config file, located in
-*../Users/[your user]/AppData/Roaming/DiscordStreamCompanion*
+This information is saved in a config file, located in *../Users/[username]/AppData/Roaming/DiscordStreamCompanion*
 I may consider a custom datafolder for this in the future, to allow portable installs and stuff.
 Currently, the png output of the Voicechannel display and the log files are also located there. This may become a config option in the future as well.
 
