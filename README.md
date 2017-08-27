@@ -1,17 +1,17 @@
 # DiscordStreamCompanion
-This software is a rather basic Selfbot for Discord. This means that it's a bot running through your existing Discord client account.
+This software is a rather basic Selfbot for Discord. This means that it's a bot running through your existing Discord client account.<br />
 [How to set it up](#configuration)
 
 ## On the topic of Selfbots
-There are some things to keep in mind when using this software:
-Selfbots are a grey area to the Discord team. They are not forbidden, but if they cause problems, spam a lot or violate TOS you risk an *account ban*.
-Anything you do with this bot, any trouble you cause and any consequences you receive are *solely on you*. *I am not responsible for your stupidity*. You can read the full Discord Terms of Service [here](https://discordapp.com/terms).
-Also, some users may simply not like Selfbots. If you should encounter such users, stay friendly and respectful and either turn the bot off temporarily or at least stop using it in public.
-Additionally, anyone wanting to get angry with me for making this, save your breath. I have worked in the Minecraft modding community, anything you can throw at me I've probably seen before.
+There are some things to keep in mind when using this software:<br />
+Selfbots are a grey area to the Discord team. They are not forbidden, but if they cause problems, spam a lot or violate TOS you risk an *account ban*.<br />
+Anything you do with this bot, any trouble you cause and any consequences you receive are *solely on you*. *I am not responsible for your stupidity*. You can read the full Discord Terms of Service [here](https://discordapp.com/terms).<br />
+Also, some users may simply not like Selfbots. If you should encounter such users, stay friendly and respectful and either turn the bot off temporarily or at least stop using it in public.<br />
+Additionally, anyone wanting to get angry with me for making this, save your breath. I have worked in the Minecraft modding community, anything you can throw at me I've probably seen before.<br />
 All in all, respect Wheaton's Law and you should be fine.
 
 ## What it does
-Currently, DSC's featureset is very limited. It was created in order to show the users in a voicechannel without needing to use the Streamkit (it's annoying and randomly joins you into channels when opening OBS >_>)
+Currently, DSC's featureset is very limited. It was created in order to show the users in a voicechannel without needing to use the Streamkit (it's annoying and randomly joins you into channels when opening OBS >_>)<br />
 ATM, that's all it does:
  * Basic display of users in the currently active voicechannel
    * Configurable in Alignment (left/right), Colours, Avatars (y/n) and Channel Name (y/n)
@@ -30,9 +30,9 @@ This is mostly a hobby project / for shits and giggles, but I have some ideas wh
 * Livestream announcements, proclaiming a link to your stream
 
 ## Configuration
-When starting the bot for the first time, it will open a config window which requires you to enter your Token. You may also set other options there.
-This information is saved in a config file, located in *../Users/[username]/AppData/Roaming/DiscordStreamCompanion*
-I may consider a custom datafolder for this in the future, to allow portable installs and stuff.
+When starting the bot for the first time, it will open a config window which requires you to enter your Token. You may also set other options there.<br />
+This information is saved in a config file, located in *../Users/[username]/AppData/Roaming/DiscordStreamCompanion*<br />
+I may consider a custom datafolder for this in the future, to allow portable installs and stuff.<br />
 Currently, the png output of the Voicechannel display and the log files are also located there. This may become a config option in the future as well.
 
 ### Token
@@ -49,13 +49,13 @@ Current commands that this bot knows: (all command messages are deleted after ex
  * !dsc.shutdown : Stops the bot
 
 ## Bugs, Errors, Feature Suggestions
-Bugs go on the issue tracker on this here Github page.
+Bugs go on the issue tracker on this here Github page.<br />
 Feature Suggestions also go there, feel free to put [Suggestion] or something in the title to make it more obvious. I won't guarantee that I can or will add any of them. But I love brainstorming, so hit me up ^^
 
 ## License of the Code
 It's Apache, you can do a lot with it, provided you give credit and stuff. I won't help you if you break it though, that's on you.
 
 ## Credit where it's due
-This selfbot uses [JDA](https://github.com/DV8FromTheWorld/JDA), a Java wrapper for Discord's websockets.
-The SystemTray icon is a modified on the base of the default Discord icon, as found on their [branding page](https://discordapp.com/branding).
+This selfbot uses [JDA](https://github.com/DV8FromTheWorld/JDA), a Java wrapper for Discord's websockets.<br />
+The SystemTray icon is a modified on the base of the default Discord icon, as found on their [branding page](https://discordapp.com/branding).<br />
 No harm or infringement is meant to any of them, please don't sue me.
