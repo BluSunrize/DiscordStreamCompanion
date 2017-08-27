@@ -54,3 +54,8 @@ Feature Suggestions also go there, feel free to put [Suggestion] or something in
 
 ## License of the Code
 It's Apache, you can do a lot with it, provided you give credit and stuff. I won't help you if you break it though, that's on you.
+
+## Credit where it's due
+This selfbot uses [JDA](https://github.com/DV8FromTheWorld/JDA) JDA, a Java wrapper for Discord's websockets.
+The SystemTray icon is a modified on the base of the default Discord icon, as found on their [branding page](https://discordapp.com/branding).
+No harm or infringement is meant to any of them, please don't sue me.
