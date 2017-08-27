@@ -1,17 +1,27 @@
 # Compiled class file
 *.class
 
+# intellij #
+/.idea/
+*.iml
+
+## eclipse ##
+/bin/
+/.settings/
+.classpath
+.project
+
 # Log file
 *.log
 
-# BlueJ files
-*.ctxt
+## gradle ##
+/build/
+/.gradle/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 *.zip
