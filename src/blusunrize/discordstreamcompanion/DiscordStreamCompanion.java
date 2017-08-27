@@ -64,6 +64,7 @@ public class DiscordStreamCompanion extends ListenerAdapter
 	private JDA jdaInstance;
 
 	private String userId;
+	private TrayIcon systemTray;
 
 	public DiscordStreamCompanion() throws Exception
 	{
@@ -131,9 +132,9 @@ public class DiscordStreamCompanion extends ListenerAdapter
 				return;
 			}
 
-			final TrayIcon trayIcon = new TrayIcon(new ImageIcon(imageURL, "tray icon").getImage());
-			trayIcon.setImageAutoSize(true);
-			trayIcon.setToolTip("Discord Stream Companion");
+			systemTray = new TrayIcon(new ImageIcon(imageURL, "tray icon").getImage());
+			systemTray.setImageAutoSize(true);
+			systemTray.setToolTip("Discord Stream Companion");
 			final SystemTray tray = SystemTray.getSystemTray();
 			final PopupMenu popup = new PopupMenu();
 
@@ -151,9 +152,9 @@ public class DiscordStreamCompanion extends ListenerAdapter
 			item = new MenuItem("Exit");
 			item.addActionListener(e -> cmdShutdown());
 			popup.add(item);
-			trayIcon.setPopupMenu(popup);
+			systemTray.setPopupMenu(popup);
 
-			tray.add(trayIcon);
+			tray.add(systemTray);
 		} catch(Exception e)
 		{
 			logger.log(Level.SEVERE, "Error setting up SystemTray", e);
@@ -177,6 +178,8 @@ public class DiscordStreamCompanion extends ListenerAdapter
 					}
 
 		logger.info("Connection has been established, Selfbot active for "+userId);
+		if(systemTray!=null)
+			systemTray.displayMessage("DiscordStreamCompanion", "Connection has been established, Selfbot active for "+userId, TrayIcon.MessageType.NONE);
 	}
 
 	//==============================================
