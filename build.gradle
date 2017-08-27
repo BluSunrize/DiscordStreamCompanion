@@ -6,21 +6,10 @@
  * user guide available at https://docs.gradle.org/4.1/userguide/tutorial_java_projects.html
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'me.trnl:github-release-gradle-plugin:0.1'
-    }
-}
-
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 // Apply the application plugin to add support for building an application
 apply plugin: 'application'
-//Github Plugin by trnl
-apply plugin: 'github'
 
 def mainVersion = '1.0'
 def buildNumber = '9'
@@ -67,16 +56,5 @@ jar {
     }
     doLast {
         tasks.increment.execute() //After all is done, increment the buildnumber for next time
-    }
-}
-
-github {
-    /* Wiki repo will be calculated from this. */
-    repo = 'git@github.com:BluSunrize/DiscordStreamCompanion.git'
-
-    release {
-        /* Use {} brackets for lazy evaluation */
-        tag = { "r$project.release.version" }
-        name = { "$project.release.version" }
     }
 }
