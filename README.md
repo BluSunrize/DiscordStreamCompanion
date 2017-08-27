@@ -1,5 +1,6 @@
 # DiscordStreamCompanion
 This software is a rather basic Selfbot for Discord. This means that it's a bot running through your existing Discord client account.
+[How to set it up](#setup)
 
 ## On the topic of Selfbots
 There are some things to keep in mind when using this software:
@@ -30,13 +31,15 @@ This is mostly a hobby project / for shits and giggles, but I have some ideas wh
 
 ## Configuration
 When starting the bot for the first time, it will open a config window which requires you to enter your Token. You may also set other options there.
-This information is saved in a config file, located in *../Users/[your user]/AppData/Roaming/DiscordStreamCompanion*. I may consider a custom datafolder for this in the future, to allow portable installs and stuff.
+This information is saved in a config file, located in
+*../Users/[your user]/AppData/Roaming/DiscordStreamCompanion*
+I may consider a custom datafolder for this in the future, to allow portable installs and stuff.
 Currently, the png output of the Voicechannel display and the log files are also located there. This may become a config option in the future as well.
 
 ### Token
 To get your Discord Client token for this bot do the following steps:
 1. In your browser or Discord client on your PC, hold 'Ctrl-Shift-I'. That should bring up website debug stuffs on the right side.
-2. Go to the **Application** tab at the top (may be hidden behind the '>>'' ) and navigate to **Storage** > **LocalStorage** > **https://discordapp.com**.
+2. Go to the **Application** tab at the top (may be hidden behind the '>>'' ) and navigate to **Storage** > **LocalStorage** > **discordapp.com**.
 3. Find the key 'token', the value behind it is your client token. **KEEP THIS TO YOURSELF!** This token offers full access to your Discord account so don't share it with **anyone**. The configuration window of this bot specifically treats the Token field as a Password field and will obscure it. It is plaintext in the config however, so **be careful**.
 4. Paste that token, without the surrounding quotation marks into the config window (or config file, if it already exists) of your DSC, and you should be good to go!
 
