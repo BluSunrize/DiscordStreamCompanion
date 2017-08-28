@@ -7,7 +7,11 @@ import blusunrize.discordstreamcompanion.config.ConfigFileAdapters;
 import blusunrize.discordstreamcompanion.config.ConfigGUIAdapters;
 import blusunrize.discordstreamcompanion.config.ConfigValue.ConfigValueFactory;
 import blusunrize.discordstreamcompanion.modules.IModule;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.VoiceChannel;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent;
@@ -84,6 +88,27 @@ public class ModuleVoiceChannel extends ListenerAdapter implements IModule
 	public void onConfigChanged()
 	{
 		resetVoiceHandlers();
+	}
+
+
+	@Override
+	public void onReady(ReadyEvent event)
+	{
+		SelfUser self = jda().getSelfUser();
+		search:
+		{
+			for(Guild guild : self.getMutualGuilds())
+				for(VoiceChannel vc : guild.getVoiceChannels())
+					for(Member m : vc.getMembers())
+						if(m.getUser().getId().equals(self.getId()))
+						{
+							logger().info("Found user in voicechannel "+guild.getName()+"-"+vc.getName());
+							joinVoice(vc);
+							break search;
+						}
+			logger().info("User was not found in any voicechannel");
+
+		}
 	}
 
 	HashMap<String, VoiceHandler> voiceHandlers = new HashMap<>();

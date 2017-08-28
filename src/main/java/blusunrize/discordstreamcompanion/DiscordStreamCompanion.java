@@ -14,6 +14,7 @@ import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.core.hooks.EventListener;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
@@ -74,12 +75,12 @@ public class DiscordStreamCompanion extends ListenerAdapter
 
 		try
 		{
-			this.jdaInstance = new JDABuilder(AccountType.CLIENT)
-					.setToken(config.getToken())
-					.addEventListener(this)
-					.setStatus(OnlineStatus.IDLE)
-					.setIdle(true)
-					.buildAsync();
+			JDABuilder builder = new JDABuilder(AccountType.CLIENT).setToken(config.getToken()).setStatus(OnlineStatus.IDLE).setIdle(true);
+			builder.addEventListener(this);
+			for(IModule module : modules)
+				if(module instanceof EventListener)
+					builder.addEventListener(module);
+			this.jdaInstance = builder.buildAsync();
 		} catch(LoginException|IllegalArgumentException|RateLimitedException e)
 		{
 			logger.severe(e.getLocalizedMessage());
@@ -189,18 +190,7 @@ public class DiscordStreamCompanion extends ListenerAdapter
 	@Override
 	public void onReady(ReadyEvent event)
 	{
-		SelfUser self = jdaInstance.getSelfUser();
-		userId = getUserId(self);
-
-//		search:
-//		for(Guild guild : self.getMutualGuilds())
-//			for(VoiceChannel vc : guild.getVoiceChannels())
-//				for(Member m : vc.getMembers())
-//					if(m.getUser().getId().equals(self.getId()))
-//					{
-//						joinVoice(vc);
-//						break search;
-//					}
+		userId = getUserId(jdaInstance.getSelfUser());
 
 		logger.info("Connection has been established, Selfbot active for "+userId);
 		if(systemTray!=null)
