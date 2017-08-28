@@ -64,7 +64,8 @@ public class Config
 					allValues.put(cfgValue.getKey(), cfgValue);
 					list.add(cfgValue);
 				}
-			moduleValues.put(module, list.toArray(new ConfigValue[list.size()]));
+			if(!list.isEmpty())
+				moduleValues.put(module, list.toArray(new ConfigValue[list.size()]));
 		}
 
 		if(configFile.exists())
