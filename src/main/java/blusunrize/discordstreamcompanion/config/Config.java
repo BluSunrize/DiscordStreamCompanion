@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +55,10 @@ public class Config
 			for(Field field : module.getClass().getDeclaredFields())
 				if(field.isAnnotationPresent(ConfigValueFactory.class))
 				{
+					if(!Modifier.isPublic(field.getModifiers()))
+						throw new RuntimeException("Error accessing "+field.getName()+", config fields must be public");
+					else if(Modifier.isFinal(field.getModifiers()))
+						throw new RuntimeException("Error accessing "+field.getName()+", config fields musn't be final");
 					ConfigValueFactory factory = field.getAnnotation(ConfigValueFactory.class);
 					ConfigValue cfgValue = new ConfigValue(module, field, factory);
 					allValues.put(cfgValue.getKey(), cfgValue);

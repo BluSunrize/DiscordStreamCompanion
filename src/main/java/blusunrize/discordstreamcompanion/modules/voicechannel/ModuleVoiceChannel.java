@@ -68,17 +68,17 @@ public class ModuleVoiceChannel extends ListenerAdapter implements IModule
 	}
 
 	@ConfigValueFactory(key = "update_voice", fileAdapter = ConfigFileAdapters.INTEGER, guiName = "Refresh Frequency (ms)", guiAdapter = ConfigGUIAdapters.INTEGER)
-	private int cfg_updateFrequency = 500;
+	public int cfg_updateFrequency = 500;
 	@ConfigValueFactory(key = "text_color", fileAdapter = ConfigFileAdapters.COLOR, guiName = "Text Color", guiAdapter = ConfigGUIAdapters.COLOR)
-	private Color cfg_textColor = Color.lightGray;
+	public Color cfg_textColor = Color.lightGray;
 	@ConfigValueFactory(key = "bg_color", fileAdapter = ConfigFileAdapters.COLOR, guiName = "Background Color", guiAdapter = ConfigGUIAdapters.COLOR)
-	private Color cfg_bgColor = Color.darkGray;
+	public Color cfg_bgColor = Color.darkGray;
 	@ConfigValueFactory(key = "alignment", fileAdapter = ConfigFileAdapters.ENUM, guiName = "Alignment", guiAdapter = ConfigGUIAdapters.ENUM)
-	private AlignmentStyle cfg_alignment = AlignmentStyle.LEFT;
+	public AlignmentStyle cfg_alignment = AlignmentStyle.LEFT;
 	@ConfigValueFactory(key = "style_channelname", fileAdapter = ConfigFileAdapters.ENUM, guiName = "Channel Name", guiAdapter = ConfigGUIAdapters.ENUM)
-	private ChannelNameStyle cfg_channelNameStyle = ChannelNameStyle.EXTENDED;
+	public ChannelNameStyle cfg_channelNameStyle = ChannelNameStyle.EXTENDED;
 	@ConfigValueFactory(key = "show_avatars", fileAdapter = ConfigFileAdapters.BOOLEAN, guiName = "Show Avatars", guiAdapter = ConfigGUIAdapters.BOOLEAN)
-	private boolean cfg_showAvatars = true;
+	public boolean cfg_showAvatars = true;
 
 	@Override
 	public void onConfigChanged()
