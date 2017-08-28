@@ -1,15 +1,17 @@
 package blusunrize.discordstreamcompanion;
 
+import blusunrize.discordstreamcompanion.command.CommandHandler;
 import blusunrize.discordstreamcompanion.config.Config;
 import blusunrize.discordstreamcompanion.modules.IModule;
+import blusunrize.discordstreamcompanion.modules.ModuleBase;
 import blusunrize.discordstreamcompanion.modules.voicechannel.ModuleVoiceChannel;
+import blusunrize.discordstreamcompanion.systemtray.SystemTrayHandler;
 import blusunrize.discordstreamcompanion.util.Utils;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.SelfUser;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -18,14 +20,8 @@ import net.dv8tion.jda.core.hooks.EventListener;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import javax.security.auth.login.LoginException;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
-import java.net.URL;
 import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
@@ -52,12 +48,13 @@ public class DiscordStreamCompanion extends ListenerAdapter
 	public final Logger logger = Logger.getLogger("DSC");
 	private final File dataFolder;
 	private final Config config;
+	private final CommandHandler commandHandler;
+	private final SystemTrayHandler systemTrayHandler;
 	private JDA jdaInstance;
 
-	private IModule[] modules = {new ModuleVoiceChannel()};
+	private IModule[] modules = {new ModuleBase(), new ModuleVoiceChannel()};
 
 	private String userId;
-	private TrayIcon systemTray;
 
 	public DiscordStreamCompanion() throws Exception
 	{
@@ -65,7 +62,8 @@ public class DiscordStreamCompanion extends ListenerAdapter
 		this.dataFolder.mkdirs();
 		this.setupLogger();
 		this.config = new Config(this, dataFolder);
-		this.setupTray();
+		this.commandHandler = new CommandHandler(this);
+		this.systemTrayHandler = new SystemTrayHandler(this);
 
 		for(IModule module : modules)
 			module.setDSC(this);
@@ -100,6 +98,11 @@ public class DiscordStreamCompanion extends ListenerAdapter
 	public String getUserId()
 	{
 		return userId;
+	}
+
+	public Config getConfig()
+	{
+		return config;
 	}
 
 	public boolean isMe(User user)
@@ -138,126 +141,29 @@ public class DiscordStreamCompanion extends ListenerAdapter
 		}
 	}
 
-	private void setupTray()
-	{
-		if(SystemTray.isSupported())
-			logger.info("Setting up SystemTray");
-		else
-		{
-			logger.info("SystemTray is not supported, tray icon cannot be set up");
-			return;
-		}
-
-		try
-		{
-			URL imageURL = DiscordStreamCompanion.class.getResource("images/icon.png");
-
-			if(imageURL==null)
-			{
-				logger.severe("SystemTray Icon not found");
-				return;
-			}
-
-			systemTray = new TrayIcon(new ImageIcon(imageURL, "tray icon").getImage());
-			systemTray.setImageAutoSize(true);
-			systemTray.setToolTip("Discord Stream Companion");
-			final SystemTray tray = SystemTray.getSystemTray();
-			final PopupMenu popup = new PopupMenu();
-
-			Menu about = new Menu("About");
-			about.add("Author: BluSunrize");
-			about.add("Libraries: JDA + Dependencies");
-			popup.add(about);
-
-			popup.addSeparator();
-
-			MenuItem item = new MenuItem("Config");
-			item.addActionListener(e -> cmdConfig());
-			popup.add(item);
-
-			item = new MenuItem("Exit");
-			item.addActionListener(e -> cmdShutdown());
-			popup.add(item);
-			systemTray.setPopupMenu(popup);
-
-			tray.add(systemTray);
-		} catch(Exception e)
-		{
-			logger.log(Level.SEVERE, "Error setting up SystemTray", e);
-		}
-	}
-
 	@Override
 	public void onReady(ReadyEvent event)
 	{
 		userId = getUserId(jdaInstance.getSelfUser());
 
-		logger.info("Connection has been established, Selfbot active for "+userId);
-		if(systemTray!=null)
-			systemTray.displayMessage("DiscordStreamCompanion", "Connection has been established, Selfbot active for "+userId, TrayIcon.MessageType.NONE);
+		String message = "Connection has been established, Selfbot active for "+userId;
+		logger.info(message);
+		systemTrayHandler.displayMessage(message, 3);
 	}
 
 	//==============================================
 	//COMMANDS
 	//==============================================
-	private static final String PREFIX = "!dsc.";
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
-		if(event.getMessage().getContent().startsWith(PREFIX)&&userId!=null&&userId.equals(getUserId(event.getAuthor())))
+		if(event.getMessage().getContent().startsWith(commandHandler.commandPrefix)&&userId!=null&&userId.equals(getUserId(event.getAuthor())))
 		{
 			Message message = event.getMessage();
-			String content = message.getContent();
-
-			switch(content.substring(PREFIX.length()))
-			{
-				case "shutdown":
-					message.delete().complete();
-					cmdShutdown();
-					break;
-				case "ping":
-					logger.info("Requesting ping");
-					new Thread(() -> {
-						message.editMessage("Pong! :three:").complete();
-						Utils.threadSleep(1000);
-						message.editMessage("Pong! :two:").complete();
-						Utils.threadSleep(1000);
-						message.editMessage("Pong! :one:").complete();
-						Utils.threadSleep(1000);
-					}).run();
-					break;
-				case "config":
-				case "cfg":
-					cmdConfig();
-					break;
-			}
-
-			message.delete().complete();
+			commandHandler.onCommand(message, message.getContent());
 		}
 	}
-
-	private void cmdShutdown()
-	{
-		logger.info("Shutting down");
-		this.jdaInstance.shutdown();
-		System.exit(0);
-	}
-
-	private void cmdConfig()
-	{
-		logger.info("Opening config");
-		this.config.openConfigGui(this).addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosed(WindowEvent e)
-			{
-				for(IModule module : getModules())
-					module.onConfigChanged();
-			}
-		});
-	}
-
 
 	private String getUserId(User user)
 	{
