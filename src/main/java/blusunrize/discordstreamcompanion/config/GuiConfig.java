@@ -1,94 +1,120 @@
 package blusunrize.discordstreamcompanion.config;
 
+import blusunrize.discordstreamcompanion.DiscordStreamCompanion;
+import blusunrize.discordstreamcompanion.modules.IModule;
 import blusunrize.discordstreamcompanion.util.Utils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map.Entry;
 
 /**
+ * Copyright 2017 BluSunrize
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  * @author BluSunrize
- * @since 26.08.2017
+ * @since 27.08.2017
  */
-public class GuiConfig
+public class GuiConfig extends JFrame
 {
-	private Config config;
-
-	private JFrame frame;
-	private JPanel window;
-
-	private JButton button_save;
-	private JButton button_exit;
-	private JPasswordField field_token;
-	private JCheckBox checkbox_token;
-	private JTextField field_frequency;
-	private JTextField field_color;
-	private JComboBox select_alignment;
-	private JCheckBox checkbox_avatars;
-	private JTextField field_bgcolor;
-	private JComboBox select_channelName;
-
-	public GuiConfig()
+	public GuiConfig(DiscordStreamCompanion dsc, Config config)
 	{
-		checkbox_token.addActionListener(e -> field_token.setEchoChar(checkbox_token.isSelected()?0: '•'));
+		super("Configure DiscordStreamCompanion");
 
-		button_exit.addActionListener(e -> {
-			Utils.closeJFrame(frame);
-		});
+//		JPanel content = new JPanel();
+//		this.setLayout(new GridLayout(2,1));
+		this.setLayout(new BorderLayout());
+		this.setMinimumSize(new Dimension(400, 200));
 
+		JTabbedPane tabbedPane = new JTabbedPane();
+
+		JPanel base = new JPanel();
+		base.add(new JLabel("Token"));
+		JPanel token = new JPanel();
+		JPasswordField jpf = new JPasswordField(config.getToken());
+		JCheckBox checkbox_token = new JCheckBox("Show");
+		checkbox_token.addActionListener(e -> jpf.setEchoChar(checkbox_token.isSelected()?0: '•'));
+		token.add(jpf);
+		token.add(checkbox_token);
+		base.add(token);
+
+		tabbedPane.add("Base", base);
+
+		for(Entry<IModule, ConfigValue[]> entry : config.getModuleValues().entrySet())
+			tabbedPane.add(entry.getKey().getName(), createTab(entry.getValue()));
+
+		this.add(tabbedPane, BorderLayout.NORTH);
+
+		JButton button_save = new JButton("Save");
 		button_save.addActionListener(e -> {
-			this.saveConfig();
-			frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-			Utils.closeJFrame(frame);
+			saveConfig(dsc, config);
+			this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+			Utils.closeJFrame(this);
 		});
+
+		JButton button_exit = new JButton("Close");
+		button_exit.addActionListener(e -> {
+			Utils.closeJFrame(this);
+		});
+		JPanel buttons = new JPanel();
+		buttons.add(button_save);
+		buttons.add(button_exit);
+		this.add(buttons, BorderLayout.SOUTH);
+
+//		this.setContentPane(content);
+		this.pack();
+		this.setVisible(true);
 	}
 
-	public GuiConfig setFrame(JFrame frame)
+	private JPanel createTab(ConfigValue... options)
 	{
-		this.frame = frame;
-		return this;
-	}
-
-	public JPanel getWindow()
-	{
-		return window;
-	}
-
-	public GuiConfig setConfig(Config config)
-	{
-		this.config = config;
-
-		this.field_token.setText(this.config.getToken());
-		this.field_frequency.setText(""+this.config.getUpdateFrequency());
-		this.field_color.setText("#"+Integer.toHexString(this.config.getTextColor().getRGB()));
-		this.field_bgcolor.setText("#"+Integer.toHexString(this.config.getBgColor().getRGB()));
-		this.select_alignment.setSelectedIndex(this.config.getAlignment().ordinal());
-		this.select_channelName.setSelectedIndex(this.config.getShowChannelName().ordinal());
-		this.checkbox_avatars.setSelected(this.config.getShowAvatars());
-		return this;
-	}
-
-	private void saveConfig()
-	{
-		if(this.config!=null)
+		JPanel keys = new JPanel();
+		keys.setLayout(new GridLayout(options.length, 1));
+		JPanel values = new JPanel();
+		values.setLayout(new GridLayout(options.length, 1));
+		for(ConfigValue cfgEntry : options)
 		{
-			this.config.setToken(new String(field_token.getPassword()));
-			this.config.setUpdateFrequency(Utils.parseInteger(field_frequency.getText(), 500));
-			this.config.setTextColor(Utils.parseColor(field_color.getText(), Color.lightGray));
-			this.config.setBgColor(Utils.parseColor(field_bgcolor.getText(), Color.darkGray));
-			this.config.setAlignment(AlignmentStyle.values()[select_alignment.getSelectedIndex()]);
-			this.config.setShowChannelName(ChannelNameStyle.values()[select_channelName.getSelectedIndex()]);
-			this.config.setShowAvatars(checkbox_avatars.isSelected());
-
-			this.config.saveConfig();
-
-			if(!this.config.isLoaded())
-				this.config.setLoaded(true);
+			keys.add(new JLabel(cfgEntry.getGuiName()));
+			values.add(cfgEntry.getGuiComponent());
 		}
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridLayout(1, 2));
+		panel.add(keys);
+		panel.add(values);
+		return panel;
 	}
+//
+//	private JPanel createTab(Map<String, JComponent> options)
+//	{
+//		JPanel keys = new JPanel();
+//		keys.setLayout(new GridLayout(options.size(),1));
+//		JPanel values = new JPanel();
+//		values.setLayout(new GridLayout(options.size(),1));
+//		for(Entry<String, JComponent> entry : options.entrySet())
+//		{
+//			keys.add(new JLabel(entry.getKey()));
+//			values.add(entry.getValue());
+//		}
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new GridLayout(1,2));
+//		panel.add(keys);
+//		panel.add(values);
+//		return panel;
+//	}
 
-	private void createUIComponents()
+	private void saveConfig(DiscordStreamCompanion dsc, Config config)
 	{
-		select_alignment = new JComboBox(AlignmentStyle.values());
-		select_channelName = new JComboBox(ChannelNameStyle.values());
+		config.saveConfig(dsc);
 	}
 }

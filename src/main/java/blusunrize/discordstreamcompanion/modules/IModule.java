@@ -1,4 +1,9 @@
-package blusunrize.discordstreamcompanion.config;
+package blusunrize.discordstreamcompanion.modules;
+
+import blusunrize.discordstreamcompanion.DiscordStreamCompanion;
+import net.dv8tion.jda.core.JDA;
+
+import java.util.logging.Logger;
 
 /**
  * Copyright 2017 BluSunrize
@@ -16,11 +21,30 @@ package blusunrize.discordstreamcompanion.config;
  * limitations under the License.
  *
  * @author BluSunrize
- * @since 26.08.2017
+ * @since 27.08.2017
  */
-public enum ChannelNameStyle
+public interface IModule
 {
-	NONE,
-	SIMPLE,
-	EXTENDED;
+	String getName();
+
+	void setDSC(DiscordStreamCompanion dsc);
+
+	DiscordStreamCompanion getDSC();
+
+	default Logger logger()
+	{
+		return getDSC().getLogger();
+	}
+
+	default JDA jda()
+	{
+		return getDSC().getJDAInstance();
+	}
+
+	default String userId()
+	{
+		return getDSC().getUserId();
+	}
+
+	void onConfigChanged();
 }

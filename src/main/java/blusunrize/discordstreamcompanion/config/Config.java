@@ -1,25 +1,29 @@
 package blusunrize.discordstreamcompanion.config;
 
 import blusunrize.discordstreamcompanion.DiscordStreamCompanion;
-import blusunrize.discordstreamcompanion.util.Utils;
+import blusunrize.discordstreamcompanion.config.ConfigValue.ConfigValueFactory;
+import blusunrize.discordstreamcompanion.modules.IModule;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
  * Copyright 2017 BluSunrize
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,26 +38,38 @@ public class Config
 	private File configFile;
 
 	private String token;
-	private int updateFrequency = 500;
-	private Color textColor = Color.lightGray;
-	private Color bgColor = Color.darkGray;
-	private AlignmentStyle alignment = AlignmentStyle.LEFT;
-	private boolean showAvatars = true;
-	private ChannelNameStyle channelNameStyle = ChannelNameStyle.EXTENDED;
 
 	private boolean isLoaded = false;
+
+	private LinkedHashMap<IModule, ConfigValue[]> moduleValues = new LinkedHashMap<>();
+	private LinkedHashMap<String, ConfigValue> allValues = new LinkedHashMap<>();
 
 	public Config(DiscordStreamCompanion dsc, File dataFolder) throws Exception
 	{
 		configFile = new File(dataFolder, "config.cfg");
+
+		for(IModule module : dsc.getModules())
+		{
+			List<ConfigValue> list = new ArrayList<>();
+			for(Field field : module.getClass().getDeclaredFields())
+				if(field.isAnnotationPresent(ConfigValueFactory.class))
+				{
+					ConfigValueFactory factory = field.getAnnotation(ConfigValueFactory.class);
+					ConfigValue cfgValue = new ConfigValue(module, field, factory);
+					allValues.put(cfgValue.getKey(), cfgValue);
+					list.add(cfgValue);
+				}
+			moduleValues.put(module, list.toArray(new ConfigValue[list.size()]));
+		}
+
 		if(configFile.exists())
 		{
-			dsc.logger.info("Loading Config");
-			load();
+			dsc.getLogger().info("Loading Config");
+			load(dsc);
 		} else
 		{
-			dsc.logger.info("No Config Present, creating new one");
-			createConfig();
+			dsc.getLogger().info("No Config Present, creating new one");
+			createConfig(dsc);
 		}
 	}
 
@@ -77,138 +93,63 @@ public class Config
 		return token;
 	}
 
-	public void setUpdateFrequency(int updateFrequency)
+	public HashMap<IModule, ConfigValue[]> getModuleValues()
 	{
-		this.updateFrequency = updateFrequency;
+		return moduleValues;
 	}
 
-	public int getUpdateFrequency()
-	{
-		return updateFrequency;
-	}
-
-	public Color getTextColor()
-	{
-		return textColor;
-	}
-
-	public void setTextColor(Color textColor)
-	{
-		this.textColor = textColor;
-	}
-
-	public Color getBgColor()
-	{
-		return bgColor;
-	}
-
-	public void setBgColor(Color bgColor)
-	{
-		this.bgColor = bgColor;
-	}
-
-	public AlignmentStyle getAlignment()
-	{
-		return alignment;
-	}
-
-	public void setAlignment(AlignmentStyle alignment)
-	{
-		this.alignment = alignment;
-	}
-
-	public boolean getShowAvatars()
-	{
-		return showAvatars;
-	}
-
-	public void setShowAvatars(boolean showAvatars)
-	{
-		this.showAvatars = showAvatars;
-	}
-
-	public ChannelNameStyle getShowChannelName()
-	{
-		return channelNameStyle;
-	}
-
-	public void setShowChannelName(ChannelNameStyle channelNameStyle)
-	{
-		this.channelNameStyle = channelNameStyle;
-	}
-
-	private void load() throws Exception
+	private void load(DiscordStreamCompanion dsc) throws Exception
 	{
 		List<String> lines = Files.readAllLines(configFile.toPath());
 		for(String line : lines)
-		{
-			String[] parts = line.split("=", 2);
-			String key = parts[0].trim().toLowerCase();
-			String value = parts.length > 1?parts[1].trim(): null;
-			switch(key)
+			if(line.indexOf("=") >= 0)
 			{
-				case "token":
+				String[] parts = line.split("=", 2);
+				String key = parts[0].trim().toLowerCase();
+				String value = parts.length > 1?parts[1].trim(): null;
+				if("token".equals(key))
 					token = value;
-					break;
-				case "update_voice":
-					updateFrequency = Integer.parseInt(value.replaceAll("\\D", ""));
-					break;
-				case "text_color":
-					textColor = Utils.parseColor(value, Color.lightGray);
-					break;
-				case "bg_color":
-					bgColor = Utils.parseColor(value, Color.darkGray);
-					break;
-				case "alignment":
-					alignment = (AlignmentStyle)Utils.parseEnum(value.toUpperCase(), AlignmentStyle.LEFT);
-					break;
-				case "show_avatars":
-					showAvatars = "false".equalsIgnoreCase(value)?false: true;
-					break;
-				case "style_channelname":
-					channelNameStyle = (ChannelNameStyle)Utils.parseEnum(value.toUpperCase(), ChannelNameStyle.EXTENDED);
-					break;
+				else if(allValues.containsKey(key))
+				{
+					ConfigValue cfg = allValues.get(key);
+					cfg.readConfigFileValue(value);
+				}
 			}
-		}
 		this.isLoaded = true;
 	}
 
-	private void createConfig()
-	{
-		openConfigGui().setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-
-	public JFrame openConfigGui()
-	{
-		JFrame frame = new JFrame("Configure DiscordStreamCompanion");
-		GuiConfig gui = new GuiConfig().setFrame(frame).setConfig(this);
-		frame.setContentPane(gui.getWindow());
-		frame.pack();
-		frame.setVisible(true);
-		return frame;
-	}
-
-	public void saveConfig()
+	public void saveConfig(DiscordStreamCompanion dsc)
 	{
 		try
 		{
 			BufferedWriter writer = new BufferedWriter(new FileWriter(configFile));
 			writer.write("token="+token);
-			writer.newLine();
-			writer.write("update_voice="+updateFrequency);
-			writer.newLine();
-			writer.write("text_color=#"+Integer.toHexString(textColor.getRGB()));
-			writer.newLine();
-			writer.write("bg_color=#"+Integer.toHexString(bgColor.getRGB()));
-			writer.newLine();
-			writer.write("alignment="+alignment.name().toLowerCase());
-			writer.newLine();
-			writer.write("show_avatars="+showAvatars);
-			writer.newLine();
-			writer.write("style_channelname="+channelNameStyle.name().toLowerCase());
+
+			for(ConfigValue cfg : allValues.values())
+			{
+				writer.newLine();
+				writer.write(cfg.getKey()+"="+cfg.getConfigFileValue());
+			}
+
 			writer.close();
 		} catch(Exception e)
 		{
 		}
+	}
+
+	private void createConfig(DiscordStreamCompanion dsc)
+	{
+		openConfigGui(dsc).setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+	}
+
+	public JFrame openConfigGui(DiscordStreamCompanion dsc)
+	{
+//		JFrame frame = new JFrame("Configure DiscordStreamCompanion");
+//		GuiConfig_old gui = new GuiConfig_old().setFrame(frame).setConfig(this);
+//		frame.setContentPane(gui.getWindow());
+//		frame.pack();
+//		frame.setVisible(true);
+//		return frame;
+		return new GuiConfig(dsc, this);
 	}
 }
