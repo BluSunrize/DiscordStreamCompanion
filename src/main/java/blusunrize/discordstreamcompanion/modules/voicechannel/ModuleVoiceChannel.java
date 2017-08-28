@@ -1,8 +1,6 @@
 package blusunrize.discordstreamcompanion.modules.voicechannel;
 
 import blusunrize.discordstreamcompanion.DiscordStreamCompanion;
-import blusunrize.discordstreamcompanion.config.AlignmentStyle;
-import blusunrize.discordstreamcompanion.config.ChannelNameStyle;
 import blusunrize.discordstreamcompanion.config.ConfigFileAdapters;
 import blusunrize.discordstreamcompanion.config.ConfigGUIAdapters;
 import blusunrize.discordstreamcompanion.config.ConfigValue.ConfigValueFactory;

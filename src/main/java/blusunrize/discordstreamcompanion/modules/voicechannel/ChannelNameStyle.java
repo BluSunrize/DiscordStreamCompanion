@@ -1,4 +1,4 @@
-package blusunrize.discordstreamcompanion.config;
+package blusunrize.discordstreamcompanion.modules.voicechannel;
 
 /**
  * Copyright 2017 BluSunrize
@@ -18,8 +18,9 @@ package blusunrize.discordstreamcompanion.config;
  * @author BluSunrize
  * @since 26.08.2017
  */
-public enum AlignmentStyle
+public enum ChannelNameStyle
 {
-	LEFT,
-	RIGHT;
+	NONE,
+	SIMPLE,
+	EXTENDED;
 }
